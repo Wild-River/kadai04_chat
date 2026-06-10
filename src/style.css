@@ -1,6 +1,6 @@
 :root {
-  --color-primary: #4285f4;
-  --color-danger: #e53e3e;
+  --color-primary: #00a5ff;
+  --color-danger: #e21010;
 
   --color-bg-white: #fff;
   --color-bg-light: #f0f0f0;
@@ -27,6 +27,7 @@ body {
 }
 
 #header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -38,6 +39,17 @@ body {
 #user-info {
   font-size: 14px;
   color: var(--color-text);
+}
+
+#app-logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--color-primary);
+  white-space: nowrap;
 }
 
 button {
@@ -252,6 +264,15 @@ button {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
+  }
+
+  /* スマホではロゴの絶対配置を解除して、通常の縦並びに */
+  #app-logo {
+    position: static;
+    transform: none;
+    text-align: center;
+    font-size: 26px;
+    order: -1; /* ロゴを一番上に持ってくる */
   }
 
   /* ボタンをまとめている div を横並びに */

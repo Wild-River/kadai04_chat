@@ -73,7 +73,9 @@ function createMap(mapId) {
     center: { lat: 35.6700, lng: 139.7023 },
     zoom: 15,
     mapId: mapId,
-    mapTypeControl: false
+    mapTypeControl: false,     // 地図/航空写真
+    streetViewControl: false,  // ストリートビューの人形アイコン
+    fullscreenControl: false,  // 全画面ボタン
   });
 }
 
