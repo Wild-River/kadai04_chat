@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firestorage MAP APP</title>
+</head>
+
+<body>
+    <div id="header">
+        <span id="user-info">未ログイン</span>
+        <div>
+            <button id="login-btn">Googleでログイン</button>
+            <button id="logout-btn">ログアウト</button>
+            <button id="style-toggle">地図スタイル切替</button>
+        </div>
+    </div>
+    <div id="map-container">
+        <div id="filter-bar"></div>
+        <div id="map"></div>
+
+        <div id="detail-panel" class="detail-panel">
+            <button id="detail-close" class="detail-close">×</button>
+
+            <!-- 表示モード -->
+            <div id="detail-view" class="detail-body">
+                <span id="detail-category" class="detail-category"></span>
+                <h2 id="detail-name"></h2>
+                <div id="detail-blocks"></div>
+                <table id="detail-table" class="detail-table">
+                    <tr id="detail-hours-row">
+                        <th>営業時間</th>
+                        <td id="detail-hours"></td>
+                    </tr>
+                </table>
+                <div class="detail-actions">
+                    <button id="detail-edit" class="btn-edit">編集</button>
+                    <button id="detail-delete" class="btn-delete">削除</button>
+                </div>
+            </div>
+
+            <!-- 編集モード -->
+            <div id="detail-edit-form" class="detail-body" style="display:none;">
+                <h2 id="edit-title">スポットを編集</h2>
+
+                <label>ジャンル <span class="required">*</span></label>
+                <select id="edit-category">
+                    <option value="">選択してください</option>
+                    <option value="cafe">カフェ</option>
+                    <option value="restaurant">レストラン</option>
+                    <option value="entertainment">エンタメ</option>
+                    <option value="cinema">映画館</option>
+                    <option value="hotel">ホテル</option>
+                    <option value="museum">美術館</option>
+                </select>
+
+                <label>名前 <span class="required">*</span></label>
+                <input type="text" id="edit-name" placeholder="スポット名">
+
+                <label>営業時間（任意）</label>
+                <input type="text" id="edit-hours" placeholder="例: 10:00 - 22:00">
+
+                <label>本文（ブロック）<span class="required">*</span></label>
+                <div id="blocks-container"></div>
+
+                <div class="block-add-buttons">
+                    <button type="button" id="add-text-block">＋ テキスト</button>
+                    <button type="button" id="add-image-block">＋ 画像</button>
+                </div>
+
+                <p id="edit-form-error" class="form-error"></p>
+
+                <div class="detail-actions">
+                    <button id="edit-cancel" class="btn-cancel">キャンセル</button>
+                    <button id="edit-submit" class="btn-submit">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module" src="/src/script.js"></script>
+</body>
+
+</html>
