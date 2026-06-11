@@ -116,7 +116,7 @@ function buildFilterBar(map) {
     const chip = document.createElement("button");
     chip.className = "filter-chip active";
     chip.style.background = cat.color;
-    chip.innerHTML = `<span class="dot" style="background:white;"></span>${cat.label}`;
+    chip.innerHTML = cat.label;
 
     chip.onclick = () => {
       if (activeCategories.has(key)) {

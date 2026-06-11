@@ -96,7 +96,6 @@ button {
 .filter-chip {
   display: flex;
   align-items: center;
-  gap: 6px;
   padding: 6px 14px;
   border-radius: 20px;
   border: 2px solid transparent;
@@ -111,12 +110,6 @@ button {
 
 .filter-chip.active {
   color: var(--color-bg-white);
-}
-
-.filter-chip .dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
 }
 
 /* 投稿・編集モーダル */

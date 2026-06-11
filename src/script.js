@@ -1,6 +1,6 @@
 import "./style.css";
 
-import { loginWithGoogle, logout, watchAuthState } from "./firebase.js";
+import { loginWithGoogle, logout, watchAuthState, handleRedirectResult } from "./firebase.js";
 import { loadGoogleMaps, initMap } from "./map.js";
 
 document.getElementById("login-btn").addEventListener("click", async () => {
@@ -9,6 +9,16 @@ document.getElementById("login-btn").addEventListener("click", async () => {
 
 document.getElementById("logout-btn").addEventListener("click", async () => {
   await logout();
+});
+
+// リダイレクトから戻ってきた結果を処理（エラー確認用）
+handleRedirectResult().catch((err) => {
+  console.error("リダイレクトログイン失敗:", err);
+});
+
+// ログインボタン（飛ばすだけ）
+document.getElementById("login-btn").addEventListener("click", () => {
+  loginWithGoogle();
 });
 
 // ログイン状態によって地図を制御
