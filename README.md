@@ -1,3 +1,5 @@
+![screenShot](./img/map-app.jpg)
+
 # ①課題名
 
 おでかけフォトマップ

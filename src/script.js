@@ -1,6 +1,6 @@
 import "./style.css";
 
-import { loginWithGoogle, logout, watchAuthState, handleRedirectResult } from "./firebase.js";
+import { loginWithGoogle, logout, watchAuthState } from "./firebase.js";
 import { loadGoogleMaps, initMap } from "./map.js";
 
 document.getElementById("login-btn").addEventListener("click", async () => {
@@ -11,15 +11,20 @@ document.getElementById("logout-btn").addEventListener("click", async () => {
   await logout();
 });
 
-// リダイレクトから戻ってきた結果を処理（エラー確認用）
-handleRedirectResult().catch((err) => {
-  console.error("リダイレクトログイン失敗:", err);
+document.getElementById("login-btn").addEventListener("click", async () => {
+  const user = await loginWithGoogle();
+  console.log("ログイン成功:", user.displayName);
 });
 
+// リダイレクトから戻ってきた結果を処理（エラー確認用）
+// handleRedirectResult().catch((err) => {
+//   console.error("リダイレクトログイン失敗:", err);
+// });
+
 // ログインボタン（飛ばすだけ）
-document.getElementById("login-btn").addEventListener("click", () => {
-  loginWithGoogle();
-});
+// document.getElementById("login-btn").addEventListener("click", () => {
+//   loginWithGoogle();
+// });
 
 // ログイン状態によって地図を制御
 watchAuthState(async (user) => {
@@ -42,5 +47,6 @@ watchAuthState(async (user) => {
     logoutBtn.style.display = "none";   // ログアウトボタンを隠す
     styleToggle.style.display = "none";  // 未ログインは隠す
     document.getElementById("map").innerHTML = "ログインすると地図が表示されます";
+    document.getElementById("filter-bar").innerHTML = "";
   }
 });

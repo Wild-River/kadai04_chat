@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -23,20 +23,20 @@ provider.setCustomParameters({
 });
 
 // ログイン（ポップアップ方式）
-// export async function loginWithGoogle() {
-//   const result = await signInWithPopup(auth, provider);
-//   return result.user;
-// }
-// ① Googleのページへ飛ばす
 export async function loginWithGoogle() {
-  await signInWithRedirect(auth, provider);
+  const result = await signInWithPopup(auth, provider);
+  return result.user;
 }
+// ① Googleのページへ飛ばす
+// export async function loginWithGoogle() {
+//   await signInWithRedirect(auth, provider);
+// }
 
-// ② 戻ってきたときに結果を受け取る
-export async function handleRedirectResult() {
-  const result = await getRedirectResult(auth);
-  return result?.user || null;
-}
+// // ② 戻ってきたときに結果を受け取る
+// export async function handleRedirectResult() {
+//   const result = await getRedirectResult(auth);
+//   return result?.user || null;
+// }
 
 export async function logout() {
   await signOut(auth);
