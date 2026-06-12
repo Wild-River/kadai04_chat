@@ -1,4 +1,4 @@
-![screenShot](./img/map-app.jpg)
+![screenShot](./img/screenshot.webp)
 
 # ②課題内容（どんな作品か）
 
