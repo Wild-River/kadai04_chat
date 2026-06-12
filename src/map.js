@@ -19,11 +19,16 @@ let editingBlocks = [];
 // ============================================
 // Google Maps SDK 読み込み
 // ============================================
+let googleMapsPromise = null;   // 読み込みPromiseを覚えておく
 
 export function loadGoogleMaps() {
   // すでに読み込み済みならスキップ
   if (window.google && window.google.maps) {
     return Promise.resolve();
+  }
+  // すでに読み込み中なら、同じPromiseを返す（二重読み込み防止）
+  if (googleMapsPromise) {
+    return googleMapsPromise;
   }
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
