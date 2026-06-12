@@ -222,12 +222,12 @@ function openDetailPanel(map, pin, marker) {
     if (block.type === "text") {
       const p = document.createElement("p");
       p.className = "detail-text-block";
-      p.textContent = block.content;
+      p.textContent = block.content; // テキストはそのまま表示
       blocksContainer.appendChild(p);
     } else if (block.type === "image") {
       const img = document.createElement("img");
       img.className = "detail-image-block";
-      img.src = block.url;
+      img.src = block.url; // ← URLを画像のsrcにする
       blocksContainer.appendChild(img);
     }
   });
@@ -317,7 +317,7 @@ function renderBlocks() {
 function setupBlockAddButtons() {
   // テキストブロックを追加
   document.getElementById("add-text-block").onclick = () => {
-    editingBlocks.push({ type: "text", content: "" });
+    editingBlocks.push({ type: "text", content: "" });//これがテキストの時のオブジェクトになる
     renderBlocks();
   };
 
@@ -329,7 +329,7 @@ function setupBlockAddButtons() {
     input.onchange = () => {
       const file = input.files[0];
       if (!file) return;
-      editingBlocks.push({ type: "image", url: null, file: file });
+      editingBlocks.push({ type: "image", url: null, file: file }); //これが画像の時のオブジェクトになる
       renderBlocks();
     };
     input.click();
@@ -405,19 +405,20 @@ async function saveBlockPin({ mode, lat, lng, user, pin, marker }) {
 
   clearEditError();
 
-  // 画像ブロックのうち file があるものをアップロード
+  // 画像をStorageにアップロードしてblocksに配列として詰める
   const blocks = [];
   for (const block of editingBlocks) {
-    if (block.type === "image" && block.file) {
-      const url = await uploadPhoto(block.file, uid);
-      blocks.push({ type: "image", url });
-    } else if (block.type === "image") {
+    if (block.type === "image" && block.file) { //新規で登録するとき、まだfileのURLが存在しない
+      const url = await uploadPhoto(block.file, uid); // storage.jsでアップロード
+      blocks.push({ type: "image", url }); // url = Storageに保存して返ってきたURL
+    } else if (block.type === "image") { //編集の時はfileはStorageにあるからblock.fileにはない
       blocks.push({ type: "image", url: block.url });
     } else {
       blocks.push({ type: "text", content: block.content.trim() });
     }
   }
 
+  // 全部丸ごとdataに保存
   const data = {
     lat: lat ?? pin?.lat,
     lng: lng ?? pin?.lng,
@@ -431,7 +432,7 @@ async function saveBlockPin({ mode, lat, lng, user, pin, marker }) {
     addMarker(currentMap, { ...data, id: pin.id });
     console.log("更新しました:", data);
   } else {
-    const docRef = await savePin(data);
+    const docRef = await savePin(data); // db.jsでforestoreに保存
     addMarker(currentMap, { ...data, id: docRef.id });
     console.log("保存しました:", data);
   }

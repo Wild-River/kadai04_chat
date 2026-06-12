@@ -3,7 +3,7 @@ import { collection, addDoc, deleteDoc, getDocs, doc, updateDoc } from "firebase
 
 // ピンを保存
 export async function savePin(data) {
-  const docRef = await addDoc(collection(db, "pins"), {
+  const docRef = await addDoc(collection(db, "pins"), { //Firestoreのpins/にデータを書き込む
     ...data,
     createdAt: new Date(),
   });
