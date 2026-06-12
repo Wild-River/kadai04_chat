@@ -15,7 +15,7 @@
         <span id="user-info">未ログイン</span>
         <h1 id="app-logo">おでかけフォトマップ</h1>
         <div>
-            <button id="login-btn">Googleでログイン</button>
+            <!-- <button id="login-btn">Googleでログイン</button> -->
             <button id="logout-btn">ログアウト</button>
             <button id="style-toggle">地図スタイル切替</button>
         </div>
@@ -23,6 +23,38 @@
     <div id="map-container">
         <div id="filter-bar"></div>
         <div id="map"></div>
+
+        <!-- ウェルカム画面（未ログイン時に表示） -->
+        <div id="welcome-screen">
+            <div class="welcome-content">
+                <h1 class="welcome-title">おでかけフォトマップ</h1>
+                <p class="welcome-text">地図上の好きな場所にピンを立てて、<br>写真とテキストで記録しよう！</p>
+                <button id="login-btn" class="welcome-login-btn">Googleでログイン</button>
+            </div>
+        </div>
+
+        <!-- 確認ダイアログ -->
+        <div id="confirm-dialog" class="confirm-overlay" style="display:none;">
+            <div class="confirm-box">
+                <p id="confirm-message" class="confirm-message"></p>
+                <div class="confirm-actions">
+                    <button id="confirm-cancel" class="confirm-cancel">キャンセル</button>
+                    <button id="confirm-ok" class="confirm-ok">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 画像ソース選択用のダイアログ -->
+        <div id="image-source-dialog" class="confirm-overlay" style="display:none;">
+            <div class="confirm-box">
+                <p class="confirm-message">画像を追加</p>
+                <div class="image-source-actions">
+                    <button id="source-camera" class="source-btn">カメラで撮影</button>
+                    <button id="source-gallery" class="source-btn">ギャラリーから選択</button>
+                    <button id="source-cancel" class="source-cancel">キャンセル</button>
+                </div>
+            </div>
+        </div>
 
         <div id="detail-panel" class="detail-panel">
             <button id="detail-close" class="detail-close">×</button>

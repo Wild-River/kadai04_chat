@@ -49,7 +49,7 @@ export function initMap(user) {
   setupMap(user);
 
   // 初期ラベル
-  document.getElementById("style-toggle").textContent = "カラーに切替";
+  document.getElementById("style-toggle").textContent = "カラーのマップに切替";
 
   // スタイル切り替えボタン
   document.getElementById("style-toggle").onclick = () => {
@@ -58,7 +58,7 @@ export function initMap(user) {
       : import.meta.env.VITE_GOOGLE_MAP_ID;
 
     const isMonochrome = currentMapId === import.meta.env.VITE_GOOGLE_MAP_ID;
-    document.getElementById("style-toggle").textContent = isMonochrome ? "カラーに切替" : "モノクロに切替";
+    document.getElementById("style-toggle").textContent = isMonochrome ? "カラーのマップに切替" : "モノクロのマップに切替";
 
     setupMap(user);   // 地図を作り直す（クリックリスナーも含めて再セット）
   };
@@ -85,9 +85,34 @@ function createMap(mapId) {
   });
 }
 
+// 自作の確認ダイアログ
+function showConfirm(message) {
+  return new Promise((resolve) => {
+    const dialog = document.getElementById("confirm-dialog");
+    const messageEl = document.getElementById("confirm-message");
+    const okBtn = document.getElementById("confirm-ok");
+    const cancelBtn = document.getElementById("confirm-cancel");
+
+    messageEl.textContent = message;
+    dialog.style.display = "flex";
+
+    // OKを押したとき
+    okBtn.onclick = () => {
+      dialog.style.display = "none";
+      resolve(true);
+    };
+
+    // キャンセルを押したとき
+    cancelBtn.onclick = () => {
+      dialog.style.display = "none";
+      resolve(false);
+    };
+  });
+}
+
 // 地図にクリックリスナーを設定（新規作成を開く）
 function attachMapClickListener(map, user) {
-  map.addListener("click", (event) => {
+  map.addListener("click", async (event) => {
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
     // 仮ピンを立てる
@@ -96,17 +121,14 @@ function attachMapClickListener(map, user) {
       map: map,
     });
     // 確認ダイアログ
-    setTimeout(() => {
-      const ok = confirm("この場所にピンを立てますか？");
-
-      if (ok) {
-        // OKなら編集画面へ
-        openEditMode(map, { mode: "new", lat, lng, user });
-      } else {
-        // キャンセルなら仮ピンを消すだけ
-        tempMarker.map = null;
-      }
-    }, 50)
+    const ok = await showConfirm("この場所にピンを立てますか？");
+    if (ok) {
+      // OKなら編集画面へ
+      openEditMode(map, { mode: "new", lat, lng, user, tempMarker });
+    } else {
+      // キャンセルなら仮ピンを消すだけ
+      tempMarker.map = null;
+    }
   });
 }
 
@@ -249,6 +271,7 @@ function openDetailPanel(map, pin, marker) {
     } else if (block.type === "image") {
       const img = document.createElement("img");
       img.className = "detail-image-block";
+      img.onload = () => img.classList.add("loaded");// 読み込み完了でフェードイン
       img.src = block.url; // ← URLを画像のsrcにする
       blocksContainer.appendChild(img);
     }
@@ -278,7 +301,8 @@ function openDetailPanel(map, pin, marker) {
 
   // 削除
   document.getElementById("detail-delete").onclick = async () => {
-    if (!confirm("このピンを削除しますか？")) return;
+    const ok = await showConfirm("この場所を削除してもよろしいですか？");
+    if (!ok) return;
     await deletePin(pin.id);
 
     // 画像ブロックをすべてStorageから削除
@@ -349,17 +373,59 @@ function setupBlockAddButtons() {
 
   // 画像ブロックを追加（ファイル選択を促す）
   document.getElementById("add-image-block").onclick = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = () => {
-      const file = input.files[0];
-      if (!file) return;
-      editingBlocks.push({ type: "image", url: null, file: file }); //これが画像の時のオブジェクトになる
-      renderBlocks();
-    };
-    input.click();
+    if (isMobileDevice()) {
+      // スマホ → 選択肢ダイアログを出す
+      openImageSourceDialog();
+    } else {
+      // PC → 直接ファイル選択
+      pickImage(false);
+    }
   };
+}
+
+// 画像ソース選択ダイアログ
+function openImageSourceDialog() {
+  const dialog = document.getElementById("image-source-dialog");
+  dialog.style.display = "flex";
+
+  // カメラで撮影
+  document.getElementById("source-camera").onclick = () => {
+    dialog.style.display = "none";
+    pickImage(true);   // カメラ起動
+  };
+
+  // ギャラリーから選択
+  document.getElementById("source-gallery").onclick = () => {
+    dialog.style.display = "none";
+    pickImage(false);  // ファイル選択
+  };
+
+  // キャンセル
+  document.getElementById("source-cancel").onclick = () => {
+    dialog.style.display = "none";
+  };
+}
+
+// スマホ（タッチデバイス）かどうかを判定
+function isMobileDevice() {
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+// 画像を選ぶ（useCamera = true ならカメラ起動）
+function pickImage(useCamera) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  if (useCamera) {
+    input.capture = "environment";   // カメラ起動（背面カメラ）
+  }
+  input.onchange = () => {
+    const file = input.files[0];
+    if (!file) return;
+    editingBlocks.push({ type: "image", url: null, file: file });//これが画像の時のオブジェクトになる
+    renderBlocks();
+  };
+  input.click();
 }
 
 function attachBlockControls() {
@@ -431,42 +497,53 @@ async function saveBlockPin({ mode, lat, lng, user, pin, marker, tempMarker }) {
 
   clearEditError();
 
-  // 画像をStorageにアップロードしてblocksに配列として詰める
-  const blocks = [];
-  for (const block of editingBlocks) {
-    if (block.type === "image" && block.file) { //新規で登録するとき、まだfileのURLが存在しない
-      const url = await uploadPhoto(block.file, uid); // storage.jsでアップロード
-      blocks.push({ type: "image", url }); // url = Storageに保存して返ってきたURL
-    } else if (block.type === "image") { //編集の時はfileはStorageにあるからblock.fileにはない
-      blocks.push({ type: "image", url: block.url });
-    } else {
-      blocks.push({ type: "text", content: block.content.trim() });
+  const submitBtn = document.getElementById("edit-submit");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "保存中…";
+
+  try {
+    // 画像をStorageにアップロードしてblocksに配列として詰める
+    const blocks = [];
+    for (const block of editingBlocks) {
+      if (block.type === "image" && block.file) { //新規で登録するとき、まだfileのURLが存在しない
+        const url = await uploadPhoto(block.file, uid); // storage.jsでアップロード
+        blocks.push({ type: "image", url }); // url = Storageに保存して返ってきたURL
+      } else if (block.type === "image") { //編集の時はfileはStorageにあるからblock.fileにはない
+        blocks.push({ type: "image", url: block.url });
+      } else {
+        blocks.push({ type: "text", content: block.content.trim() });
+      }
     }
+    // 全部丸ごとdataに保存
+    const data = {
+      lat: lat ?? pin?.lat,
+      lng: lng ?? pin?.lng,
+      userId: uid,
+      category, name, hours, blocks
+    };
+
+    if (isEdit) {
+      await updatePin(pin.id, { category, name, hours, blocks });
+      marker.map = null;
+      addMarker(currentMap, { ...data, id: pin.id });
+      console.log("更新しました:", data);
+    } else {
+      const docRef = await savePin(data); // db.jsでforestoreに保存
+      addMarker(currentMap, { ...data, id: docRef.id });
+      console.log("保存しました:", data);
+    }
+
+    // 新規保存後、仮ピンを消す（本番ピンはaddMarkerで立つ）
+    if (tempMarker) tempMarker.map = null;
+    document.getElementById("detail-panel").classList.remove("open"); // パネルを閉じる
+  } catch (err) {
+    console.error("保存に失敗しました:", err);
+    showEditError("保存に失敗しました。もう一度お試しください");
+  } finally {
+    // 成功でも失敗でも、ボタンを元に戻す
+    submitBtn.disabled = false;
+    submitBtn.textContent = "保存";
   }
-
-  // 全部丸ごとdataに保存
-  const data = {
-    lat: lat ?? pin?.lat,
-    lng: lng ?? pin?.lng,
-    userId: uid,
-    category, name, hours, blocks
-  };
-
-  if (isEdit) {
-    await updatePin(pin.id, { category, name, hours, blocks });
-    marker.map = null;
-    addMarker(currentMap, { ...data, id: pin.id });
-    console.log("更新しました:", data);
-  } else {
-    const docRef = await savePin(data); // db.jsでforestoreに保存
-    addMarker(currentMap, { ...data, id: docRef.id });
-    console.log("保存しました:", data);
-  }
-
-  // 新規保存後、仮ピンを消す（本番ピンはaddMarkerで立つ）
-  if (tempMarker) tempMarker.map = null;
-
-  document.getElementById("detail-panel").classList.remove("open"); // パネルを閉じる
 }
 
 function showEditError(message) {

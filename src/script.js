@@ -26,14 +26,14 @@ watchAuthState(async (user) => {
     logoutBtn.style.display = "";       // ログアウトボタンを表示
     styleToggle.style.display = "";      // ログイン中は表示
     // ログイン済みなら地図を初期化
+    document.getElementById("welcome-screen").style.display = "none";
+    document.getElementById("header").style.display = "flex";  // headerを表示
     await loadGoogleMaps();
     initMap(user);
   } else {
     info.textContent = "未ログイン";
-    loginBtn.style.display = "";        // 未ログインはログインボタンを表示
-    logoutBtn.style.display = "none";   // ログアウトボタンを隠す
-    styleToggle.style.display = "none";  // 未ログインは隠す
-    document.getElementById("map").innerHTML = "ログインすると地図が表示されます";
+    document.getElementById("header").style.display = "none";  // headerを非表示
+    document.getElementById("welcome-screen").style.display = "flex";  // ウェルカム画面を表示
     document.getElementById("filter-bar").innerHTML = "";
   }
 });
