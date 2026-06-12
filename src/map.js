@@ -20,6 +20,7 @@ let editingBlocks = [];
 // Google Maps SDK 読み込み
 // ============================================
 let googleMapsPromise = null;   // 読み込みPromiseを覚えておく
+let bouncingMarker = null;   // 今バウンド中のマーカー
 
 export function loadGoogleMaps() {
   // すでに読み込み済みならスキップ
@@ -87,12 +88,25 @@ function createMap(mapId) {
 // 地図にクリックリスナーを設定（新規作成を開く）
 function attachMapClickListener(map, user) {
   map.addListener("click", (event) => {
-    openEditMode(map, {
-      mode: "new",
-      lat: event.latLng.lat(),
-      lng: event.latLng.lng(),
-      user,
+    const lat = event.latLng.lat();
+    const lng = event.latLng.lng();
+    // 仮ピンを立てる
+    const tempMarker = new google.maps.marker.AdvancedMarkerElement({
+      position: { lat, lng },
+      map: map,
     });
+    // 確認ダイアログ
+    setTimeout(() => {
+      const ok = confirm("この場所にピンを立てますか？");
+
+      if (ok) {
+        // OKなら編集画面へ
+        openEditMode(map, { mode: "new", lat, lng, user });
+      } else {
+        // キャンセルなら仮ピンを消すだけ
+        tempMarker.map = null;
+      }
+    }, 50)
   });
 }
 
@@ -202,6 +216,14 @@ function addMarker(map, pin) {
 // ============================================
 
 function openDetailPanel(map, pin, marker) {
+  // 前にバウンドしていたピンがあれば、バウンドを止める
+  if (bouncingMarker) {
+    bouncingMarker.content.classList.remove("pin-bounce");
+  }
+  // 今回のピンをバウンドさせる
+  marker.content.classList.add("pin-bounce");
+  bouncingMarker = marker;
+
   const panel = document.getElementById("detail-panel");
   const cat = CATEGORIES[pin.category] || { label: "その他", color: "#666" };
 
@@ -268,6 +290,10 @@ function openDetailPanel(map, pin, marker) {
 
     marker.map = null;
     panel.classList.remove("open");
+    if (bouncingMarker) {
+      bouncingMarker.content.classList.remove("pin-bounce");
+      bouncingMarker = null;
+    }
   };
 }
 
@@ -373,7 +399,7 @@ function attachBlockControls() {
   });
 }
 
-async function saveBlockPin({ mode, lat, lng, user, pin, marker }) {
+async function saveBlockPin({ mode, lat, lng, user, pin, marker, tempMarker }) {
   const isEdit = mode === "edit";
   // 編集時はuserが無いので、アップロード用にuidを用意
   const uid = user?.uid || pin?.userId;
@@ -437,6 +463,9 @@ async function saveBlockPin({ mode, lat, lng, user, pin, marker }) {
     console.log("保存しました:", data);
   }
 
+  // 新規保存後、仮ピンを消す（本番ピンはaddMarkerで立つ）
+  if (tempMarker) tempMarker.map = null;
+
   document.getElementById("detail-panel").classList.remove("open"); // パネルを閉じる
 }
 
@@ -449,7 +478,7 @@ function clearEditError() {
 }
 
 function openEditMode(map, options) {
-  const { mode, lat, lng, user, pin, marker } = options;
+  const { mode, lat, lng, user, pin, marker, tempMarker } = options;
   const isEdit = mode === "edit";
 
   const panel = document.getElementById("detail-panel");
@@ -488,7 +517,7 @@ function openEditMode(map, options) {
 
   // 保存
   document.getElementById("edit-submit").onclick = () => {
-    saveBlockPin({ mode, lat, lng, user, pin, marker });
+    saveBlockPin({ mode, lat, lng, user, pin, marker, tempMarker });
   };
 
   // キャンセル
@@ -498,6 +527,7 @@ function openEditMode(map, options) {
       openDetailPanel(map, pin, marker);
     } else {
       // 新規キャンセル → パネルを閉じる
+      if (tempMarker) tempMarker.map = null;
       panel.classList.remove("open");
     }
   };

@@ -422,3 +422,18 @@ button {
   border-color: var(--color-primary);
   background: var(--color-bg-white);
 }
+
+/* 選択中のピン */
+@keyframes pinBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.pin-bounce {
+  animation: pinBounce 0.6s ease-in-out 3;
+}
