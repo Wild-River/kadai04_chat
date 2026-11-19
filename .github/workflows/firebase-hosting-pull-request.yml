@@ -25,6 +25,7 @@ jobs:
           VITE_GOOGLE_MAP_ID: ${{ secrets.VITE_GOOGLE_MAP_ID }}
           VITE_GOOGLE_MAP_ID_NORMAL: ${{ secrets.VITE_GOOGLE_MAP_ID_NORMAL }}
       - uses: FirebaseExtended/action-hosting-deploy@v0
+        if: github.actor != 'dependabot[bot]'
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FIR_MAP_2026GS }}
